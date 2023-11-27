@@ -5,7 +5,8 @@
 #ifndef UNTITLED_CONSTANTHEADER_H
 #define UNTITLED_CONSTANTHEADER_H
 
-#define WELCOME_MSG "Welcome to ENSEA Tiny Shell.\n"
+#define WELCOME_MSG "Welcome to ENSEA Tiny Shell.\nType 'exit' to quit \n"
+
 
 
 #endif //UNTITLED_CONSTANTHEADER_H
