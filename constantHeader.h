@@ -6,7 +6,7 @@
 #define UNTITLED_CONSTANTHEADER_H
 
 #define WELCOME_MSG "Welcome to ENSEA Tiny Shell.\nType 'exit' to quit \n"
-
+#define PROMPT "enseash % \n"
 
 
 #endif //UNTITLED_CONSTANTHEADER_H
