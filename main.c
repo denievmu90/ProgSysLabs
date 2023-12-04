@@ -3,6 +3,7 @@
 #include <string.h>
 //#include <wait.h>
 #include <stdlib.h>
+#include<time.h>
 #include "constantHeader.h"
 #define BUFSIZE 128
 
@@ -18,16 +19,16 @@ int main() {
         //if the process is the child then we are able to write in the terminal
         if (fork() == 0) {
             execlp(console_buffer, console_buffer, NULL);
-            exit(EXIT_SUCCESS);
+            exit(EXIT_FAILURE);
         } else{
             wait(&son_exec_status);
             char msg_out[50];
             if (WIFEXITED(son_exec_status)) { // If the process exited normally
                 sprintf(msg_out, "enseash [exit:%d] %% ", WEXITSTATUS(son_exec_status));
-                write(STDIN_FILENO, msg_out, strlen(msg_out));
+                write(STDOUT_FILENO, msg_out, strlen(msg_out));
             } else if (WIFSIGNALED(son_exec_status)) { // If the process was killed by a signal
                 sprintf(msg_out, "enseash [sign:%d] %% ", WTERMSIG(son_exec_status));
-                write(STDIN_FILENO, msg_out, strlen(msg_out));
+                write(STDOUT_FILENO, msg_out, strlen(msg_out));
             }
         }
 
