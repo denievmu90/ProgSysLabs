@@ -4,6 +4,7 @@
 //#include <wait.h>
 #include <stdlib.h>
 #include<time.h>
+#include <fcntl.h>
 #include "constantHeader.h"
 #define BUFSIZE 128
 
@@ -21,14 +22,35 @@ int main() {
         char *argComplex[BUFSIZE];
         char *commandComplex = strtok(console_buffer, " "); // we split console_buffer each time there is a space in the command
         int i = 0;
+        char *inputFile;
+        char *outputFile;
         while(commandComplex != NULL) {
-            argComplex[i] = commandComplex;
-            i++;
+            if(strcmp(commandComplex, "<") == 0 ){
+                commandComplex = strtok(NULL, " ");
+                inputFile = commandComplex;
+                argComplex[i] = NULL;
+            }else if (strcmp(commandComplex, ">") == 0) {
+                commandComplex = strtok(NULL, " ");
+                outputFile = commandComplex;
+                argComplex[i] = NULL;
+            } else {
+                argComplex[i] = commandComplex;
+                i++;
+            }
             commandComplex = strtok(NULL, " "); //we go to the next arguments oF a Complex Command
         }
         argComplex[i] = NULL;
         //if the process is the child then we are able to write in the terminal
         if (fork() == 0) {
+            if ((inputFile) != NULL){
+                int fd0 = open(inputFile, O_RDONLY);
+                dup2(fd0, STDIN_FILENO);
+                close(fd0);
+            } else if((outputFile) != NULL){
+                int fd1 = open(outputFile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+                dup2(fd1, STDOUT_FILENO);
+                close(fd1);
+            }
             execvp(argComplex[0], argComplex);
             exit(EXIT_FAILURE);
         } else{
