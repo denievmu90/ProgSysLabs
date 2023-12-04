@@ -18,9 +18,18 @@ int main() {
         console_buffer[byte_read - 1] = '\0';
         struct timespec start, end;
         clock_gettime(CLOCK_REALTIME, &start);//start the timer
+        char *argComplex[BUFSIZE];
+        char *commandComplex = strtok(console_buffer, " "); // we split console_buffer each time there is a space in the command
+        int i = 0;
+        while(commandComplex != NULL) {
+            argComplex[i] = commandComplex;
+            i++;
+            commandComplex = strtok(NULL, " "); //we go to the next arguments oF a Complex Command
+        }
+        argComplex[i] = NULL;
         //if the process is the child then we are able to write in the terminal
         if (fork() == 0) {
-            execlp(console_buffer, console_buffer, NULL);
+            execvp(argComplex[0], argComplex);
             exit(EXIT_FAILURE);
         } else{
             wait(&son_exec_status);
