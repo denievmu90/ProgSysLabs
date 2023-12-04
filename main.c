@@ -16,18 +16,22 @@ int main() {
         write(STDOUT_FILENO, PROMPT, strlen(PROMPT));
         int byte_read = read(STDIN_FILENO, console_buffer, BUFSIZE);
         console_buffer[byte_read - 1] = '\0';
+        struct timespec start, end;
+        clock_gettime(CLOCK_REALTIME, &start);//start the timer
         //if the process is the child then we are able to write in the terminal
         if (fork() == 0) {
             execlp(console_buffer, console_buffer, NULL);
             exit(EXIT_FAILURE);
         } else{
             wait(&son_exec_status);
+            clock_gettime(CLOCK_REALTIME, &end);//stop the timer
+            long time_spent_ms = (end.tv_nsec - start.tv_nsec)/1000000; //conversion in ms as time is first taken in ns
             char msg_out[50];
             if (WIFEXITED(son_exec_status)) { // If the process exited normally
-                sprintf(msg_out, "enseash [exit:%d] %% ", WEXITSTATUS(son_exec_status));
+                sprintf(msg_out, "enseash [exit:%d|%ldms] %% ", WEXITSTATUS(son_exec_status), time_spent_ms);
                 write(STDOUT_FILENO, msg_out, strlen(msg_out));
             } else if (WIFSIGNALED(son_exec_status)) { // If the process was killed by a signal
-                sprintf(msg_out, "enseash [sign:%d] %% ", WTERMSIG(son_exec_status));
+                sprintf(msg_out, "enseash [sign:%d|%ldms] %% ", WTERMSIG(son_exec_status), time_spent_ms);
                 write(STDOUT_FILENO, msg_out, strlen(msg_out));
             }
         }
