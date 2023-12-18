@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include<time.h>
 #include <fcntl.h>
-#define BUFSIZE 256
+#define BUFSIZE 512
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>
@@ -16,7 +16,12 @@
 #include <sys/socket.h>
 
 int main ( int argc, char *argv[]) {
-    char server[20], file[20];
+    if (argc != 4) {
+        fprintf(stderr, "Usage: %s <server> <port> <filename>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    char server[20], file[20], mode[]="octet";
     strcpy(server, argv[1]);
     strcpy(file, argv[3]);
 
@@ -30,7 +35,7 @@ int main ( int argc, char *argv[]) {
     hints.ai_family = AF_INET;
     hints.ai_protocol = IPPROTO_UDP;
 
-    int en = getaddrinfo(server, "1069", &hints, &res);
+    int en = getaddrinfo(server, argv[2], &hints, &res);
     if (en == -1) {
         perror("getaddrinfo");
         exit(EXIT_FAILURE);
@@ -41,5 +46,59 @@ int main ( int argc, char *argv[]) {
         perror("socket");
         exit(EXIT_FAILURE);
     }
+    char RRQ[BUFSIZE];
+    memset(RRQ, 0, BUFSIZE);
+    RRQ[1] = 1;
+    strcpy(RRQ + 2, argv[3]);
+    size_t padding = strlen(RRQ+2);
+    strcpy(RRQ + 2 + padding + 1, mode);
+    size_t padding2 = strlen(RRQ + 3 + padding);
+
+    if (sendto(sock, RRQ, padding + padding2 + 4, 0, res->ai_addr, res->ai_addrlen) == -1) {
+        perror("send RRQ");
+        exit(EXIT_FAILURE);
+    }
+    int n_bytes = BUFSIZE;
+
+    while(n_bytes == BUFSIZE) {
+
+        // First reception
+        if ((n_bytes = recvfrom(sock, RRQ, BUFSIZE, 0, res->ai_addr, &res->ai_addrlen)) == -1) {
+            perror("receive DATA");
+            exit(EXIT_FAILURE);
+        }
+        printf("Heading : ");
+        for (int i = 0; i < 4; i++) {
+            printf("%x", RRQ[i]);
+        }
+        printf("\nFile content: ");
+        for (int i = 4; i < n_bytes; i++) {
+            printf("%d", RRQ[i]);
+        }
+        printf("\n");
+
+        // Sending ACK
+        RRQ[1] = 4;
+        printf("Sending ACK : ");
+        for (int i = 0; i < 4; i++) {
+            printf("%d", RRQ[i]);
+        }
+        printf("\n");
+    }
+
+
+    if (sendto(sock, RRQ, 4, 0, res->ai_addr, res->ai_addrlen) == -1) {
+        perror("Send ACK");
+        exit(EXIT_FAILURE);
+    }
+    printf("ACK send\n");
+
+
+    close(sock);
+    freeaddrinfo(res);
+
+    exit(EXIT_SUCCESS);
+
+
 
 }

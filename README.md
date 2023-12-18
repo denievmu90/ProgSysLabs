@@ -16,3 +16,13 @@ And finally also question 7, as we finally were able to create a new file or ope
 We think that it comes from the fact that the file doesn't close itself properly but it is there in the code so in the end no solutions were found.
 In summary, these labs were instrumental in enhancing our understanding of the functions and code discussed in class. 
 They also highlighted the challenges faced during the creation of a shell in C, thereby providing a comprehensive learning experience.
+
+# TP2   
+8 hours to develop a TFTP client
+
+During the last two lab, we had the opportunity to learn and apply a lot of new things.
+First we did some socket programming, creating UDP sockets to communicate between the TFTP client and server for the get and put function.
+And only at one point in the lab the two function differ, we have  gettftp which is made to download a file and then puttftp for uploading a file.
+In gettftp, the program enter a loop to receive data packets from the server, it prints the hexadecimal representation of the received packet and the content of the file and finally send acknoledgment packets back to the server.
+Whereas in puttftp, we open a file for reading, it construct a data packet with the file content and sends it to the server. And it suceeds we receive an acknoledgment packet from the server.
+To conclude, this lab gave us the foundation for understanding basic network programming and file transfer mechanisms.
